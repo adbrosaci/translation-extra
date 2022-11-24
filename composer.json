@@ -1,0 +1,60 @@
+{
+    "name": "adbros/translation-extra",
+    "description": "Extracting translation contents and updating catalogues automatically for Nette FW.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Adbros\\TranslationExtra\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">=7.4",
+        "latte/latte": "^2.4",
+        "nette/neon": "^2.4 || ^3.0",
+        "symfony/console": "^5.0 || ^6.0",
+        "symfony/finder": "^5.0 || ^6.0",
+        "symfony/translation": "^5.0 || ^6.0"
+    },
+    "require-dev": {
+        "contributte/qa": "^0.2",
+        "nette/application": "^3.0",
+        "nette/di": "^3.0",
+        "nette/forms": "^3.0",
+        "nette/tester": "^2.4",
+        "phpstan/extension-installer": "^1.2",
+        "phpstan/phpstan": "^1.9",
+        "phpstan/phpstan-deprecation-rules": "^1.0",
+        "phpstan/phpstan-strict-rules": "^1.4",
+        "tracy/tracy": "^2.4"
+    },
+    "conflict": {
+        "symfony/translation": "<5.3.4"
+    },
+    "suggest": {
+        "contributte/console": "Symfony Console for Nette FW",
+        "contributte/translation": "Symfony Translation for Nette FW"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "cs": "phpcs --standard=ruleset.xml",
+        "cs-fix": [
+            "phpcbf --standard=ruleset.xml"
+        ],
+        "phpstan": "phpstan analyse -c phpstan.neon",
+        "test": "tester -C tests/Cases",
+        "coverage": "tester -C tests/Cases -p phpdbg --coverage coverage.xml --coverage-src src tests",
+        "qa": ["@cs", "@phpstan", "@test"]
+    }
+}
