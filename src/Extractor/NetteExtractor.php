@@ -9,6 +9,7 @@ class NetteExtractor extends PhpExtractor
 
 	/** @inheritDoc */
 	protected $sequences = [
+		['_', '(', self::MESSAGE_TOKEN],
 		['->', 'translate', '(', self::MESSAGE_TOKEN],
 		['->', 'addButton', '(', self::METHOD_ARGUMENTS_TOKEN, ',', self::MESSAGE_TOKEN],
 		['->', 'addCheckbox', '(', self::METHOD_ARGUMENTS_TOKEN, ',', self::MESSAGE_TOKEN],

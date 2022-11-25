@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Translation\Catalogue\MergeOperation;
 use Symfony\Component\Translation\Catalogue\TargetOperation;
 use Symfony\Component\Translation\Extractor\ChainExtractor;
@@ -77,6 +78,9 @@ class ExtractCommand extends Command
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+		$io = new SymfonyStyle($input, $output);
+		$io->title('Translation Messages Extractor and Dumper');
+
 		$scanDirectory = count($tmp = $input->getOption('scan-dir')) > 0 ? $tmp : $this->defaultScanDir;
 		$outputDirectory = $input->getOption('output-dir') ?? $this->defaultOutputDir;
 		$locale = $input->getArgument('locale');
@@ -87,6 +91,7 @@ class ExtractCommand extends Command
 		$extractedCatalogue = new MessageCatalogue($locale);
 
 		foreach ($scanDirectory as $directory) {
+			$io->comment(sprintf('Generating "<info>%s</info>" translation files for "<info>%s</info>"', $locale, $directory));
 			$this->extractor->extract($directory, $extractedCatalogue);
 		}
 
@@ -99,6 +104,8 @@ class ExtractCommand extends Command
 		/** @var MessageCatalogue $result */
 		$result = $operation->getResult();
 		$this->writer->write($result, $format, ['path' => $outputDirectory]);
+
+		$io->success('Translation files were successfully updated and translation files were updated.');
 
 		return 0;
 	}
