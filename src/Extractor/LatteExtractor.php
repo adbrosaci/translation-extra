@@ -70,6 +70,10 @@ class LatteExtractor extends AbstractFileExtractor implements ExtractorInterface
 				continue;
 			}
 
+			if (substr($token->value, 0, 1) === '$') {
+				continue;
+			}
+
 			$args = new MacroTokens($token->value);
 			$writer = new PhpWriter($args, $token->modifiers);
 
