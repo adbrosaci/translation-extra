@@ -1,0 +1,33 @@
+parameters:
+	ignoreErrors:
+		-
+			message: """
+				#^Access to deprecated static property \\$defaultDescription of class Adbros\\\\TranslationExtra\\\\Command\\\\ExtractCommand\\:
+				since Symfony 6\\.1, use the AsCommand attribute instead$#
+			"""
+			count: 1
+			path: src/Command/ExtractCommand.php
+
+		-
+			message: """
+				#^Access to deprecated static property \\$defaultName of class Adbros\\\\TranslationExtra\\\\Command\\\\ExtractCommand\\:
+				since Symfony 6\\.1, use the AsCommand attribute instead$#
+			"""
+			count: 1
+			path: src/Command/ExtractCommand.php
+
+		-
+			message: """
+				#^Fetching deprecated class constant BLOCK of class Nette\\\\Neon\\\\Neon\\:
+				use parameter \\$blockMode$#
+			"""
+			count: 1
+			path: src/Dumper/NeonFileDumper.php
+
+		-
+			message: """
+				#^Class Adbros\\\\TranslationExtra\\\\Extractor\\\\NetteExtractor extends deprecated class Symfony\\\\Component\\\\Translation\\\\Extractor\\\\PhpExtractor\\:
+				since Symfony 6\\.2, use the PhpAstExtractor instead$#
+			"""
+			count: 1
+			path: src/Extractor/NetteExtractor.php

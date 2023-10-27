@@ -9,3 +9,6 @@ parameters:
 	fileExtensions:
 		- php
 		- phpt
+
+includes:
+	- phpstan-baseline.neon

@@ -1,7 +1,16 @@
 {_'First'}
-{_"Second"}
-{_'Third'|noescape}
-{_"Fourth"|noescape}
-{_'Long with spaces'}
-{_'Another long with spaces'|noescape}
+<div n:if="$a">{_"Second"}</div>
+<script>
+	var test = {_'Third'|noescape};
+</script>
+<div n:snippet>
+	{_"Fourth"|noescape}
+</div>
+<div n:foreach="$b as $c">
+	<p data-text="{_'Long with spaces'}"></p>
+</div>
+<div>
+	<p>{_'Another long with spaces'|noescape}</p>
+</div>
 {_$test}
+

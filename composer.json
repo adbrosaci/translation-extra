@@ -14,8 +14,8 @@
         }
     },
     "require": {
-        "php": ">=7.4",
-        "latte/latte": "^2.4",
+        "php": ">=8.0",
+        "latte/latte": "^3.0",
         "nette/neon": "^2.4 || ^3.0",
         "symfony/console": "^5.0 || ^6.0",
         "symfony/finder": "^5.0 || ^6.0",

@@ -2,11 +2,17 @@
 
 namespace Adbros\TranslationExtra\Extractor;
 
-use Latte\MacroTokens;
-use Latte\Parser;
-use Latte\PhpWriter;
-use Latte\Token;
+use Latte\Compiler\Node;
+use Latte\Compiler\Nodes\FragmentNode;
+use Latte\Compiler\Nodes\Php\Scalar\StringNode;
+use Latte\Engine;
+use Latte\Essential\Nodes\PrintNode;
+use Latte\Essential\TranslatorExtension;
+use Latte\Tools\Linter;
 use LogicException;
+use Nette\Bridges\ApplicationLatte\LatteFactory;
+use Nette\Bridges\ApplicationLatte\UIExtension;
+use Nette\Bridges\FormsLatte\FormsExtension;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Translation\Extractor\AbstractFileExtractor;
 use Symfony\Component\Translation\Extractor\ExtractorInterface;
@@ -17,6 +23,22 @@ class LatteExtractor extends AbstractFileExtractor implements ExtractorInterface
 {
 
 	private string $prefix = '';
+
+	private Engine $engine;
+
+	public function __construct(
+		?LatteFactory $latteFactory = null
+	)
+	{
+		if ($latteFactory !== null) {
+			$this->engine = $latteFactory->create();
+			$this->engine->addExtension(new TranslatorExtension(null));
+			$this->engine->addExtension(new UIExtension(null));
+			$this->engine->addExtension(new FormsExtension());
+		} else {
+			$this->engine = (new Linter())->getEngine();
+		}
+	}
 
 	/**
 	 * @inheritDoc
@@ -59,33 +81,52 @@ class LatteExtractor extends AbstractFileExtractor implements ExtractorInterface
 
 	protected function extractFile(string $file, MessageCatalogue $catalogue): void
 	{
-		$parser = new Parser();
+		$templateNode = $this->engine->parse(file_get_contents($file));
 
-		foreach ($parser->parse(file_get_contents($file)) as $token) {
-			if ($token->type !== Token::MACRO_TAG) {
-				continue;
+		foreach ($templateNode->main as $node) {
+			$this->extractNode($node, $catalogue);
+		}
+	}
+
+	protected function extractNode(Node $node, MessageCatalogue $catalogue): void
+	{
+		if ($node instanceof PrintNode) {
+			if ($node->modifier->hasFilter('translate')) {
+				if ($node->expression instanceof StringNode) {
+					$message = $node->expression->value;
+					$catalogue->set(($this->prefix !== '' ? $this->prefix . '.' : '') . $message, $message);
+				}
+			}
+		} else {
+			if (property_exists($node, 'content') && $node->content instanceof FragmentNode) {
+				foreach ($node->content->children as $child) {
+					$this->extractNode($child, $catalogue);
+				}
 			}
 
-			if ($token->name !== '_') {
-				continue;
+			if (property_exists($node, 'attributes') && $node->attributes instanceof FragmentNode) {
+				foreach ($node->attributes->children as $child) {
+					$this->extractNode($child, $catalogue);
+				}
 			}
 
-			if (substr($token->value, 0, 1) === '$') {
-				continue;
+			if (property_exists($node, 'value') && $node->value instanceof FragmentNode) {
+				foreach ($node->value->children as $child) {
+					$this->extractNode($child, $catalogue);
+				}
 			}
 
-			$args = new MacroTokens($token->value);
-			$writer = new PhpWriter($args, $token->modifiers);
-
-			$message = $writer->write('%node.word');
-
-			if (in_array(substr(trim($message), 0, 1), ['"', '\''], true)) {
-				$message = substr(trim($message), 1, -1);
-			} elseif (substr(trim($message), 0, 1) === '(') {
-				$message = substr(trim($message), 2, -2);
+			if (property_exists($node, 'then') && $node->then instanceof FragmentNode) {
+				foreach ($node->then->children as $child) {
+					$this->extractNode($child, $catalogue);
+				}
 			}
 
-			$catalogue->set(($this->prefix !== '' ? $this->prefix . '.' : '') . $message, $message);
+			if (property_exists($node, 'else') && $node->else instanceof FragmentNode) {
+				foreach ($node->else->children as $child) {
+					$this->extractNode($child, $catalogue);
+				}
+			}
 		}
 	}
 
