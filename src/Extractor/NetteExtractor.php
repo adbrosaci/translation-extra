@@ -19,6 +19,7 @@ class NetteExtractor extends PhpExtractor
 		['->', 'addGroup', '(', self::MESSAGE_TOKEN],
 		['->', 'addImageButton', '(', self::METHOD_ARGUMENTS_TOKEN, ',', self::METHOD_ARGUMENTS_TOKEN, ',', self::MESSAGE_TOKEN],
 		['->', 'addInteger', '(', self::METHOD_ARGUMENTS_TOKEN, ',', self::MESSAGE_TOKEN],
+		['->', 'addFloat', '(', self::METHOD_ARGUMENTS_TOKEN, ',', self::MESSAGE_TOKEN],
 		['->', 'addMultiSelect', '(', self::METHOD_ARGUMENTS_TOKEN, ',', self::MESSAGE_TOKEN],
 		['->', 'addMultiUpload', '(', self::METHOD_ARGUMENTS_TOKEN, ',', self::MESSAGE_TOKEN],
 		['->', 'addPassword', '(', self::METHOD_ARGUMENTS_TOKEN, ',', self::MESSAGE_TOKEN],
