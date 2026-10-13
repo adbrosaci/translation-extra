@@ -3,6 +3,7 @@ name: 'QA'
 on:
   pull_request:
   push:
+  workflow_dispatch:
   schedule:
     - cron: '0 8 * * 1' # At 08:00 on Monday
 
