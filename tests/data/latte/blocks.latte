@@ -1,0 +1,16 @@
+{block content}
+	<h1>{_'Block heading'}</h1>
+	{snippet list}
+		{foreach $items as $item}
+			{if $item->visible}
+				<span title="{_'Nested title'}">{_'Nested content'}</span>
+			{elseif $item->hidden}
+				{_'Nested elseif'}
+			{/if}
+		{/foreach}
+	{/snippet}
+	{capture $captured}{_'Captured'}{/capture}
+{/block}
+{define row}
+	<td>{_'Defined row'}</td>
+{/define}

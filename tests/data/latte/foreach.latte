@@ -1,0 +1,12 @@
+<table>
+	{foreach $rows as $row}
+		<tr>
+			<td title="{_'Row title'}">{_'Row'}</td>
+		</tr>
+	{else}
+		<tr><td>{_'No rows'}</td></tr>
+	{/foreach}
+</table>
+<ul>
+	<li n:foreach="$items as $item">{_'Foreach item'}</li>
+</ul>

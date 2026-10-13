@@ -1,0 +1,10 @@
+{if $a}
+	{_'If branch'}
+{elseif $b}
+	{_'First elseif branch'}
+{elseif $c}
+	<span title="{_'Second elseif title'}">{_'Second elseif branch'}</span>
+{else}
+	{_'Else branch'}
+{/if}
+<p>{if $d}{_'Inline if'}{else}{_'Inline else'}{/if}</p>

@@ -1,0 +1,7 @@
+<div n:if="$show" title="{_'Shown title'}">{_'Shown content'}</div>
+<ul n:inner-foreach="$items as $item">
+	<li title="{_'Item title'}">{_'Item'}</li>
+</ul>
+<p n:if="$ajax" n:snippet="message">{_'Snippet inside condition'}</p>
+<a n:href="Homepage:default" n:class="$active ? active" title="{_'Go home'}">{_'Home'}</a>
+<span n:ifset="$label" n:tag-if="$wrap">{_'Optional label'}</span>

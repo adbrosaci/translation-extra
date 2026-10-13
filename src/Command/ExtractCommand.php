@@ -2,6 +2,7 @@
 
 namespace Adbros\TranslationExtra\Command;
 
+use Adbros\TranslationExtra\Extractor\LatteExtractor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,6 +12,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Translation\Catalogue\MergeOperation;
 use Symfony\Component\Translation\Catalogue\TargetOperation;
 use Symfony\Component\Translation\Extractor\ChainExtractor;
+use Symfony\Component\Translation\Extractor\ExtractorInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Reader\TranslationReader;
 use Symfony\Component\Translation\Writer\TranslationWriter;
@@ -37,8 +39,12 @@ class ExtractCommand extends Command
 
 	private ?string $defaultFormat;
 
+	/** @var array<ExtractorInterface> */
+	private array $extractors;
+
 	/**
 	 * @param array<string> $defaultScanDir
+	 * @param array<ExtractorInterface> $extractors
 	 */
 	public function __construct(
 		ChainExtractor $extractor,
@@ -46,7 +52,8 @@ class ExtractCommand extends Command
 		TranslationWriter $writer,
 		?array $defaultScanDir = null,
 		?string $defaultOutputDir = null,
-		?string $defaultFormat = null
+		?string $defaultFormat = null,
+		array $extractors = []
 	)
 	{
 		parent::__construct();
@@ -57,6 +64,7 @@ class ExtractCommand extends Command
 		$this->extractor = $extractor;
 		$this->reader = $reader;
 		$this->writer = $writer;
+		$this->extractors = $extractors;
 	}
 
 	protected function configure(): void
@@ -95,7 +103,27 @@ class ExtractCommand extends Command
 			$this->extractor->extract($directory, $extractedCatalogue);
 		}
 
-		$operation = $input->getOption('clean') === true
+		$templatesSkipped = false;
+
+		foreach ($this->extractors as $extractor) {
+			if (!$extractor instanceof LatteExtractor) {
+				continue;
+			}
+
+			foreach ($extractor->getErrors() as $file => $error) {
+				$templatesSkipped = true;
+				$io->warning(sprintf('Template "%s" was skipped, its messages were not extracted: %s', $file, $error));
+			}
+		}
+
+		$clean = $input->getOption('clean') === true;
+
+		if ($clean && $templatesSkipped) {
+			$io->warning('Cleaning was skipped because some templates were skipped, no messages were removed from the translation files.');
+			$clean = false;
+		}
+
+		$operation = $clean
 			? new TargetOperation($currentCatalogue, $extractedCatalogue)
 			: new MergeOperation($currentCatalogue, $extractedCatalogue);
 
