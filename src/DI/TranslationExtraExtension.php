@@ -58,6 +58,8 @@ class TranslationExtraExtension extends CompilerExtension
 		$extractor = $builder->addDefinition($this->prefix('extractor'))
 			->setFactory(ChainExtractor::class);
 
+		$extractors = [];
+
 		foreach ($this->config->extractor->extractors as $key => $value) {
 			$reflection = new ReflectionClass($value);
 
@@ -69,6 +71,7 @@ class TranslationExtraExtension extends CompilerExtension
 				->setFactory($value);
 
 			$extractor->addSetup('addExtractor', [$key, $def]);
+			$extractors[] = $def;
 		}
 
 		$reader = $builder->addDefinition($this->prefix('reader'))
@@ -108,6 +111,7 @@ class TranslationExtraExtension extends CompilerExtension
 				'defaultScanDir' => $this->config->extractor->defaultScanDir,
 				'defaultOutputDir' => $this->config->extractor->defaultOutputDir,
 				'defaultFormat' => $this->config->extractor->defaultFormat,
+				'extractors' => $extractors,
 			]);
 	}
 

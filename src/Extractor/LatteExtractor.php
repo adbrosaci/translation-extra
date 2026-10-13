@@ -2,11 +2,13 @@
 
 namespace Adbros\TranslationExtra\Extractor;
 
+use Latte\CompileException;
 use Latte\Compiler\Node;
-use Latte\Compiler\Nodes\FragmentNode;
+use Latte\Compiler\Nodes\Html\ExpressionAttributeNode;
 use Latte\Compiler\Nodes\Php\Scalar\StringNode;
+use Latte\Compiler\Nodes\PrintNode;
+use Latte\Compiler\NodeTraverser;
 use Latte\Engine;
-use Latte\Essential\Nodes\PrintNode;
 use Latte\Essential\TranslatorExtension;
 use Latte\Tools\Linter;
 use LogicException;
@@ -25,6 +27,9 @@ class LatteExtractor extends AbstractFileExtractor implements ExtractorInterface
 	private string $prefix = '';
 
 	private Engine $engine;
+
+	/** @var array<string, string> */
+	private array $errors = [];
 
 	public function __construct(
 		?LatteFactory $latteFactory = null
@@ -48,13 +53,25 @@ class LatteExtractor extends AbstractFileExtractor implements ExtractorInterface
 		$files = $this->extractFiles($resource);
 
 		foreach ($files as $file) {
-			$this->extractFile((string) $file, $catalogue);
+			try {
+				$this->extractFile((string) $file, $catalogue);
+			} catch (CompileException $e) {
+				$this->errors[(string) $file] = $e->getMessage();
+			}
 		}
 	}
 
 	public function setPrefix(string $prefix): void
 	{
 		$this->prefix = $prefix;
+	}
+
+	/**
+	 * @return array<string, string> path of the skipped template => compile error
+	 */
+	public function getErrors(): array
+	{
+		return $this->errors;
 	}
 
 	/**
@@ -83,51 +100,30 @@ class LatteExtractor extends AbstractFileExtractor implements ExtractorInterface
 	{
 		$templateNode = $this->engine->parse(file_get_contents($file));
 
-		foreach ($templateNode->main as $node) {
+		(new NodeTraverser())->traverse($templateNode, function (Node $node) use ($catalogue): void {
 			$this->extractNode($node, $catalogue);
-		}
+		});
 	}
 
 	protected function extractNode(Node $node, MessageCatalogue $catalogue): void
 	{
 		if ($node instanceof PrintNode) {
-			if ($node->modifier->hasFilter('translate')) {
-				if ($node->expression instanceof StringNode) {
-					$message = $node->expression->value;
-					$catalogue->set(($this->prefix !== '' ? $this->prefix . '.' : '') . $message, $message);
-				}
-			}
+			$modifier = $node->modifier;
+			$expression = $node->expression;
+		} elseif ($node instanceof ExpressionAttributeNode) {
+			// Latte 3.1 turns an attribute value consisting of a single print into this node
+			$modifier = $node->modifier;
+			$expression = $node->value;
 		} else {
-			if (property_exists($node, 'content') && $node->content instanceof FragmentNode) {
-				foreach ($node->content->children as $child) {
-					$this->extractNode($child, $catalogue);
-				}
-			}
-
-			if (property_exists($node, 'attributes') && $node->attributes instanceof FragmentNode) {
-				foreach ($node->attributes->children as $child) {
-					$this->extractNode($child, $catalogue);
-				}
-			}
-
-			if (property_exists($node, 'value') && $node->value instanceof FragmentNode) {
-				foreach ($node->value->children as $child) {
-					$this->extractNode($child, $catalogue);
-				}
-			}
-
-			if (property_exists($node, 'then') && $node->then instanceof FragmentNode) {
-				foreach ($node->then->children as $child) {
-					$this->extractNode($child, $catalogue);
-				}
-			}
-
-			if (property_exists($node, 'else') && $node->else instanceof FragmentNode) {
-				foreach ($node->else->children as $child) {
-					$this->extractNode($child, $catalogue);
-				}
-			}
+			return;
 		}
+
+		if (!$modifier->hasFilter('translate') || !$expression instanceof StringNode) {
+			return;
+		}
+
+		$message = $expression->value;
+		$catalogue->set(($this->prefix !== '' ? $this->prefix . '.' : '') . $message, $message);
 	}
 
 }
