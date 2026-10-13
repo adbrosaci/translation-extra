@@ -14,7 +14,7 @@ jobs:
   cs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -24,7 +24,7 @@ jobs:
   phpstan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -37,7 +37,7 @@ jobs:
       matrix:
         php: [ '8.0', '8.1', '8.2' ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -47,7 +47,7 @@ jobs:
 #  testLowest:
 #    runs-on: ubuntu-latest
 #    steps:
-#      - uses: actions/checkout@v3
+#      - uses: actions/checkout@v5
 #      - uses: shivammathur/setup-php@v2
 #        with:
 #          php-version: '8.0'
@@ -60,7 +60,7 @@ jobs:
 #    env:
 #      COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #    steps:
-#      - uses: actions/checkout@v3
+#      - uses: actions/checkout@v5
 #      - uses: shivammathur/setup-php@v2
 #        with:
 #          php-version: '7.4'
